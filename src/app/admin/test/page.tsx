@@ -1,6 +1,8 @@
 "use client";
 
-export default function AdminTestPage(): JSX.Element {
+import type { ReactElement } from "react";
+
+export default function AdminTestPage(): ReactElement {
   return (
     <main className="background-canvas min-h-screen px-6 py-16">
       <div className="mx-auto w-full max-w-3xl space-y-4 rounded-3xl border border-ink/10 bg-paper/80 p-6 shadow-[var(--shadow-soft)]">

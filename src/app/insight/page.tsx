@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactElement } from "react";
+
 const insights: readonly {
   title: string;
   description: string;
@@ -21,7 +23,7 @@ const insights: readonly {
   },
 ];
 
-export default function InsightPage(): JSX.Element {
+export default function InsightPage(): ReactElement {
   return (
     <main className="background-canvas min-h-screen px-6 py-16">
       <div className="mx-auto w-full max-w-4xl space-y-10">

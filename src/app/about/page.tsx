@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactElement } from "react";
+
 const principles: readonly { title: string; description: string }[] = [
   {
     title: "얇은 콘텐츠 금지",
@@ -18,7 +20,7 @@ const principles: readonly { title: string; description: string }[] = [
   },
 ];
 
-export default function AboutPage(): JSX.Element {
+export default function AboutPage(): ReactElement {
   return (
     <main className="background-canvas min-h-screen px-6 py-16">
       <div className="mx-auto w-full max-w-4xl space-y-10">

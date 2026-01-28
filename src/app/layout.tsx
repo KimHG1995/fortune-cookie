@@ -1,4 +1,4 @@
-import type React from "react";
+import type { ReactElement, ReactNode } from "react";
 import { Cormorant_Garamond, Space_Grotesk } from "next/font/google";
 import ErrorBoundary from "@/app/(core)/error-boundary";
 import SiteFooter from "@/app/components/site-footer";
@@ -17,10 +17,10 @@ const cormorantGaramond = Cormorant_Garamond({
 });
 
 type RootLayoutProps = {
-  readonly children: React.ReactNode;
+  readonly children: ReactNode;
 };
 
-export default function RootLayout({ children }: RootLayoutProps): JSX.Element {
+export default function RootLayout({ children }: RootLayoutProps): ReactElement {
   return (
     <html lang="ko">
       <body className={`${spaceGrotesk.variable} ${cormorantGaramond.variable}`}>

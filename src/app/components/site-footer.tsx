@@ -1,6 +1,7 @@
 import Link from "next/link";
+import type { ReactElement } from "react";
 
-export default function SiteFooter(): JSX.Element {
+export default function SiteFooter(): ReactElement {
   return (
     <footer className="border-t border-ink/10 bg-paper">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10 text-sm text-muted md:flex-row md:items-center md:justify-between">

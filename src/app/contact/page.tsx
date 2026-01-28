@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactElement } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import submitContactAction from "@/app/actions/submit-contact";
@@ -13,7 +14,7 @@ type SubmissionState = {
   readonly errorMessage: string | null;
 };
 
-export default function ContactPage(): JSX.Element {
+export default function ContactPage(): ReactElement {
   const [submissionState, setSubmissionState] = useState<SubmissionState>({
     isSubmitted: false,
     submittedAt: null,

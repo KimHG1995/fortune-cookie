@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactElement } from "react";
+
 const sections: readonly {
   title: string;
   items: readonly string[];
@@ -35,7 +37,7 @@ const sections: readonly {
   },
 ];
 
-export default function PrivacyPolicyPage(): JSX.Element {
+export default function PrivacyPolicyPage(): ReactElement {
   return (
     <main className="background-canvas min-h-screen px-6 py-16">
       <div className="mx-auto w-full max-w-4xl space-y-10">

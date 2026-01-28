@@ -1,6 +1,7 @@
 import Link from "next/link";
+import type { ReactElement } from "react";
 
-export default function SiteHeader(): JSX.Element {
+export default function SiteHeader(): ReactElement {
   return (
     <header className="border-b border-ink/10 bg-paper/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-4 px-6 py-6 md:flex-row md:items-center">
