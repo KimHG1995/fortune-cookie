@@ -20,6 +20,7 @@ export default function ContactPage(): ReactElement {
     submittedAt: null,
     errorMessage: null,
   });
+  const storageKey = "contact:daily";
   const {
     register,
     handleSubmit,
@@ -36,6 +37,16 @@ export default function ContactPage(): ReactElement {
   });
 
   async function handleSubmitContact(data: ContactFormData): Promise<void> {
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const storedDate = localStorage.getItem(storageKey);
+    if (storedDate === todayKey) {
+      setSubmissionState({
+        isSubmitted: false,
+        submittedAt: null,
+        errorMessage: "문의는 하루에 한 번만 가능합니다.",
+      });
+      return;
+    }
     const response = await submitContactAction({ data });
     if (response.success && response.data) {
       setSubmissionState({
@@ -43,6 +54,7 @@ export default function ContactPage(): ReactElement {
         submittedAt: response.data.submittedAt,
         errorMessage: null,
       });
+      localStorage.setItem(storageKey, todayKey);
       reset();
       return;
     }

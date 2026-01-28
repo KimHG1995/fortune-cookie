@@ -1,7 +1,9 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import type { ReactElement } from "react";
 import requestFortuneAction from "@/app/actions/request-fortune";
+import FortuneCookieEmoji from "@/app/components/fortune-cookie-emoji";
 import type { FortuneRequest } from "@/models/types/fortune-request";
 import type { FortuneResult } from "@/models/types/fortune";
 
@@ -35,44 +37,209 @@ type FortuneCardProps = {
   readonly fortune: FortuneResult | null;
 };
 
-function createNoiseBuffer(context: AudioContext): AudioBuffer {
-  const duration = 0.2;
+function createNoiseBuffer(context: AudioContext, duration: number): AudioBuffer {
   const frameCount = Math.floor(context.sampleRate * duration);
   const buffer = context.createBuffer(1, frameCount, context.sampleRate);
   const data = buffer.getChannelData(0);
   for (let index = 0; index < frameCount; index += 1) {
-    const fade = 1 - index / frameCount;
-    data[index] = (Math.random() * 2 - 1) * fade;
+    const position = index / frameCount;
+    const fade = 1 - position;
+    const jitter = Math.random() * 2 - 1;
+    data[index] = jitter * fade;
   }
   return buffer;
 }
 
-function playCrackSound(context: AudioContext): void {
-  const source = context.createBufferSource();
-  const filter = context.createBiquadFilter();
-  const gain = context.createGain();
-  source.buffer = createNoiseBuffer(context);
-  filter.type = "highpass";
-  filter.frequency.value = 800;
-  gain.gain.value = 0.5;
-  source.connect(filter).connect(gain).connect(context.destination);
-  source.start();
+function scheduleGainEnvelope(
+  gain: GainNode,
+  startTime: number,
+  peak: number,
+  decay: number,
+): void {
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(peak, startTime + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + decay);
 }
 
-function useAudioContext(): { play: () => void } {
+function playNoiseBurst(input: {
+  context: AudioContext;
+  startTime: number;
+  duration: number;
+  filterType: BiquadFilterType;
+  frequency: number;
+  peak: number;
+}): void {
+  const source = input.context.createBufferSource();
+  const filter = input.context.createBiquadFilter();
+  const gain = input.context.createGain();
+  source.buffer = createNoiseBuffer(input.context, input.duration);
+  filter.type = input.filterType;
+  filter.frequency.value = input.frequency;
+  scheduleGainEnvelope(gain, input.startTime, input.peak, input.duration);
+  source.connect(filter).connect(gain).connect(input.context.destination);
+  source.start(input.startTime);
+  source.stop(input.startTime + input.duration);
+}
+
+function playClick(input: {
+  context: AudioContext;
+  startTime: number;
+  frequency: number;
+  duration: number;
+  peak: number;
+}): void {
+  const oscillator = input.context.createOscillator();
+  const gain = input.context.createGain();
+  oscillator.type = "triangle";
+  oscillator.frequency.setValueAtTime(input.frequency, input.startTime);
+  scheduleGainEnvelope(gain, input.startTime, input.peak, input.duration);
+  oscillator.connect(gain).connect(input.context.destination);
+  oscillator.start(input.startTime);
+  oscillator.stop(input.startTime + input.duration);
+}
+
+function playThump(input: {
+  context: AudioContext;
+  startTime: number;
+  frequency: number;
+  duration: number;
+  peak: number;
+}): void {
+  const oscillator = input.context.createOscillator();
+  const gain = input.context.createGain();
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(input.frequency, input.startTime);
+  scheduleGainEnvelope(gain, input.startTime, input.peak, input.duration);
+  oscillator.connect(gain).connect(input.context.destination);
+  oscillator.start(input.startTime);
+  oscillator.stop(input.startTime + input.duration);
+}
+
+function playCrackSoundSynth(context: AudioContext): void {
+  const now = context.currentTime;
+  const randomRange = (range: number): number => (Math.random() - 0.5) * range;
+
+  playThump({
+    context,
+    startTime: now,
+    duration: 0.26,
+    frequency: 130 + randomRange(12),
+    peak: 0.55,
+  });
+  playNoiseBurst({
+    context,
+    startTime: now + 0.01,
+    duration: 0.14,
+    filterType: "bandpass",
+    frequency: 520 + randomRange(60),
+    peak: 0.2,
+  });
+  playNoiseBurst({
+    context,
+    startTime: now + 0.03,
+    duration: 0.24,
+    filterType: "lowpass",
+    frequency: 460 + randomRange(50),
+    peak: 0.18,
+  });
+  playNoiseBurst({
+    context,
+    startTime: now + 0.05,
+    duration: 0.34,
+    filterType: "lowpass",
+    frequency: 400,
+    peak: 0.15,
+  });
+  playNoiseBurst({
+    context,
+    startTime: now + 0.09,
+    duration: 0.4,
+    filterType: "lowpass",
+    frequency: 330,
+    peak: 0.1,
+  });
+  playClick({
+    context,
+    startTime: now + 0.015,
+    frequency: 520 + randomRange(50),
+    duration: 0.06,
+    peak: 0.08,
+  });
+}
+
+function playCrackLowEndBoost(context: AudioContext): void {
+  const now = context.currentTime;
+  const randomRange = (range: number): number => (Math.random() - 0.5) * range;
+
+  playThump({
+    context,
+    startTime: now,
+    duration: 0.16,
+    frequency: 120 + randomRange(10),
+    peak: 0.28,
+  });
+  playNoiseBurst({
+    context,
+    startTime: now + 0.02,
+    duration: 0.16,
+    filterType: "lowpass",
+    frequency: 360,
+    peak: 0.08,
+  });
+  playNoiseBurst({
+    context,
+    startTime: now + 0.08,
+    duration: 0.2,
+    filterType: "lowpass",
+    frequency: 280,
+    peak: 0.06,
+  });
+}
+
+const crackSoundUrl = "/sounds/fortune-cookie.mp3";
+
+function useCrackSound(): { play: () => void } {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const audioGainRef = useRef<GainNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+
   function play(): void {
     const context = audioContextRef.current ?? new AudioContext();
     audioContextRef.current = context;
     if (context.state === "suspended") {
       void context.resume();
     }
-    playCrackSound(context);
+    const audio = audioRef.current ?? new Audio(crackSoundUrl);
+    audioRef.current = audio;
+    audio.preload = "auto";
+    audio.currentTime = 0;
+    if (!audioSourceRef.current) {
+      const source = context.createMediaElementSource(audio);
+      const gain = context.createGain();
+      gain.gain.value = 0.8;
+      source.connect(gain).connect(context.destination);
+      audioSourceRef.current = source;
+      audioGainRef.current = gain;
+    }
+    const playResult = audio.play();
+    if (!playResult) {
+      playCrackLowEndBoost(context);
+      return;
+    }
+    playResult
+      .then(() => {
+        playCrackLowEndBoost(context);
+      })
+      .catch(() => {
+        playCrackSoundSynth(context);
+      });
   }
+
   return { play };
 }
 
-const FortuneSelector = (props: SelectorProps): JSX.Element => {
+const FortuneSelector = (props: SelectorProps): ReactElement => {
   return (
     <div className="space-y-8">
       <div className="space-y-3">
@@ -145,23 +312,16 @@ const FortuneSelector = (props: SelectorProps): JSX.Element => {
   );
 };
 
-const FortuneCard = (props: FortuneCardProps): JSX.Element => {
+const FortuneCard = (props: FortuneCardProps): ReactElement => {
+  const stripText = props.fortune?.luckyKeyword ?? "GOOD LUCK";
+
   return (
     <div
       className="cookie-crack rounded-3xl border border-ink/10 bg-surface p-6 shadow-[var(--shadow-soft)]"
       data-cracked={props.isCracked}
     >
       <div className="paper-grid rounded-2xl p-6">
-        <div className="relative flex h-52 items-center justify-center">
-          <div className="cookie-half cookie-left h-32 w-52 bg-accent" />
-          <div className="cookie-half cookie-right h-32 w-52 bg-accent" />
-          <div className="cookie-core absolute h-6 w-24 rounded-full bg-paper" />
-          <div className="cookie-crumbs absolute -bottom-6 flex gap-2">
-            <span className="h-2 w-2 rounded-full bg-accent" />
-            <span className="h-3 w-3 rounded-full bg-accent-2" />
-            <span className="h-2 w-2 rounded-full bg-accent" />
-          </div>
-        </div>
+        <FortuneCookieEmoji stripText={stripText} />
         <div className="mt-6 space-y-4 text-sm text-muted">
           <p className="text-xs uppercase tracking-[0.2em] text-muted">
             오늘의 포춘
@@ -213,14 +373,80 @@ const FortuneCard = (props: FortuneCardProps): JSX.Element => {
   );
 };
 
-export default function FortuneCookie(): JSX.Element {
+export default function FortuneCookie(): ReactElement {
   const [selectedCategory, setSelectedCategory] = useState<string>(jobCategories[0]);
   const [selectedTone, setSelectedTone] = useState<FortuneRequest["tone"]>("차분함");
   const [isCracked, setIsCracked] = useState<boolean>(false);
   const [fortune, setFortune] = useState<FortuneResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, startTransition] = useTransition();
-  const { play } = useAudioContext();
+  const { play } = useCrackSound();
+  const storageKey = "fortune-cookie:daily";
+
+  const getTodayKey = (): string => {
+    return new Date().toISOString().slice(0, 10);
+  };
+
+  const isRecord = (input: unknown): input is Record<string, unknown> => {
+    return typeof input === "object" && input !== null;
+  };
+
+  const isFortuneResult = (input: unknown): input is FortuneResult => {
+    if (!isRecord(input)) {
+      return false;
+    }
+    return (
+      typeof input.title === "string" &&
+      typeof input.summary === "string" &&
+      typeof input.action === "string" &&
+      typeof input.caution === "string" &&
+      typeof input.luckyKeyword === "string" &&
+      typeof input.luckyColor === "string" &&
+      typeof input.luckyNumber === "number" &&
+      typeof input.luckyTime === "string"
+    );
+  };
+
+  const readStoredFortune = (): FortuneResult | null => {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) {
+      return null;
+    }
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (!isRecord(parsed)) {
+        return null;
+      }
+      const date = parsed.date;
+      const fortuneData = parsed.fortune;
+      if (typeof date !== "string" || !isFortuneResult(fortuneData)) {
+        return null;
+      }
+      if (date !== getTodayKey()) {
+        return null;
+      }
+      return fortuneData;
+    } catch {
+      return null;
+    }
+  };
+
+  const saveStoredFortune = (result: FortuneResult): void => {
+    const payload = {
+      date: getTodayKey(),
+      fortune: result,
+    };
+    localStorage.setItem(storageKey, JSON.stringify(payload));
+  };
+
+  useEffect(() => {
+    const storedFortune = readStoredFortune();
+    if (!storedFortune) {
+      return;
+    }
+    setFortune(storedFortune);
+    setIsCracked(true);
+  }, []);
 
   const triggerCrackAnimation = (): void => {
     setIsCracked(false);
@@ -233,6 +459,9 @@ export default function FortuneCookie(): JSX.Element {
     const response = await requestFortuneAction({ request });
     if (response.success) {
       setFortune(response.data);
+      if (response.data) {
+        saveStoredFortune(response.data);
+      }
       setErrorMessage(null);
       return;
     }
@@ -244,6 +473,11 @@ export default function FortuneCookie(): JSX.Element {
     triggerCrackAnimation();
     play();
     setErrorMessage(null);
+    const storedFortune = readStoredFortune();
+    if (storedFortune) {
+      setFortune(storedFortune);
+      return;
+    }
     const request: FortuneRequest = {
       jobCategory: selectedCategory,
       tone: selectedTone,

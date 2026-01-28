@@ -8,6 +8,13 @@
   --color-accent: #f28b30;
   --color-accent-2: #ffcf8a;
   --color-ember: #ff6b35;
+  --color-cookie-base: #f5c08a;
+  --color-cookie-light: #f9d3a6;
+  --color-cookie-dark: #d78f52;
+  --color-cookie-edge: #c6763f;
+  --color-cookie-speck: rgba(166, 108, 63, 0.35);
+  --color-cookie-highlight: rgba(255, 255, 255, 0.55);
+  --color-cookie-shadow: rgba(18, 12, 8, 0.25);
   --color-glow-1: rgba(255, 207, 138, 0.4);
   --color-glow-2: rgba(255, 140, 61, 0.2);
   --color-grid: rgba(122, 106, 85, 0.08);
@@ -23,6 +30,13 @@
   --color-accent: #ffb766;
   --color-accent-2: #ff8c3d;
   --color-ember: #ff6b35;
+  --color-cookie-base: #e6ad73;
+  --color-cookie-light: #f0c38f;
+  --color-cookie-dark: #b66b3b;
+  --color-cookie-edge: #995126;
+  --color-cookie-speck: rgba(255, 206, 160, 0.2);
+  --color-cookie-highlight: rgba(255, 255, 255, 0.32);
+  --color-cookie-shadow: rgba(0, 0, 0, 0.55);
   --color-glow-1: rgba(255, 183, 102, 0.25);
   --color-glow-2: rgba(255, 140, 61, 0.2);
   --color-grid: rgba(179, 163, 146, 0.08);
@@ -84,33 +98,294 @@ h3 {
   isolation: isolate;
 }
 
-.cookie-half {
-  border-radius: 9999px 9999px 40% 40%;
-  box-shadow: var(--shadow-soft);
-  transition: transform 0.6s ease, box-shadow 0.6s ease;
+.fortune-figure {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 280px;
 }
 
-.cookie-crack[data-cracked="true"] .cookie-left {
-  transform: translateX(-45%) rotate(-12deg);
+.fortune-shadow {
+  position: absolute;
+  bottom: 14px;
+  width: 240px;
+  height: 28px;
+  border-radius: 999px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(20, 12, 8, 0.18),
+    transparent 70%
+  );
+  filter: blur(6px);
 }
 
-.cookie-crack[data-cracked="true"] .cookie-right {
-  transform: translateX(45%) rotate(12deg);
+.fortune-cookie-body {
+  position: relative;
+  width: 240px;
+  height: 210px;
+  border-radius: 55% 45% 60% 40%;
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.55), transparent 50%),
+    radial-gradient(circle at 75% 70%, rgba(0, 0, 0, 0.12), transparent 55%),
+    linear-gradient(155deg, var(--color-cookie-light), var(--color-cookie-base) 60%, var(--color-cookie-dark));
+  box-shadow:
+    inset 0 -18px 24px rgba(153, 97, 55, 0.3),
+    inset 0 12px 18px rgba(255, 255, 255, 0.32),
+    0 20px 30px rgba(24, 14, 8, 0.22);
+  transform: translateX(-6px);
+  transition: transform 0.6s ease;
+  z-index: 2;
+  overflow: visible;
 }
 
-.cookie-crack[data-cracked="true"] .cookie-core {
-  transform: scaleX(1.1);
+.fortune-cookie-body::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: -30px;
+  width: 140px;
+  height: 200px;
+  border-radius: 70% 70% 45% 45%;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.55), transparent 55%),
+    linear-gradient(150deg, var(--color-cookie-light), var(--color-cookie-base) 60%, var(--color-cookie-dark));
+  box-shadow:
+    inset 0 -16px 20px rgba(150, 95, 55, 0.28),
+    inset 0 10px 14px rgba(255, 255, 255, 0.35);
+  z-index: 0;
 }
 
-.cookie-crumbs {
+.fortune-cookie-body::after {
+  content: "";
+  position: absolute;
+  right: 6px;
+  top: -30px;
+  width: 140px;
+  height: 200px;
+  border-radius: 70% 70% 45% 45%;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.5), transparent 55%),
+    linear-gradient(150deg, var(--color-cookie-light), var(--color-cookie-base) 60%, var(--color-cookie-dark));
+  box-shadow:
+    inset 0 -16px 20px rgba(150, 95, 55, 0.28),
+    inset 0 10px 14px rgba(255, 255, 255, 0.35);
+  z-index: 0;
+}
+
+.fortune-cookie-body > * {
+  position: relative;
+  z-index: 1;
+}
+
+.fortune-cookie-face {
+  position: absolute;
+  left: 78px;
+  top: 86px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.fortune-cookie-eye {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #24150c;
+  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.45);
+}
+
+.fortune-cookie-eye::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.fortune-cookie-mouth {
+  position: absolute;
+  left: 106px;
+  top: 116px;
+  width: 34px;
+  height: 24px;
+  border-radius: 0 0 999px 999px;
+  background: #5d1f16;
+  box-shadow: inset 0 -2px 0 rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.fortune-cookie-mouth::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  bottom: -2px;
+  width: 22px;
+  height: 14px;
+  border-radius: 999px;
+  background: #f28aa0;
+}
+
+.fortune-cookie-blush {
+  position: absolute;
+  width: 24px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(255, 140, 150, 0.55);
+  filter: blur(0.8px);
+}
+
+.fortune-cookie-blush[data-side="left"] {
+  left: 48px;
+  top: 122px;
+}
+
+.fortune-cookie-blush[data-side="right"] {
+  left: 156px;
+  top: 122px;
+}
+
+.fortune-cookie-specks {
+  position: absolute;
+  inset: 0;
+  opacity: 0.15;
+}
+
+.fortune-cookie-speck {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(190, 130, 80, 0.4);
+}
+
+.fortune-cookie-speck:nth-child(1) {
+  left: 46px;
+  top: 158px;
+  width: 6px;
+  height: 6px;
+}
+
+.fortune-cookie-speck:nth-child(2) {
+  left: 72px;
+  top: 170px;
+  width: 5px;
+  height: 5px;
+}
+
+.fortune-cookie-speck:nth-child(3) {
+  left: 108px;
+  top: 162px;
+  width: 7px;
+  height: 7px;
+}
+
+.fortune-cookie-notch {
+  position: absolute;
+  left: 104px;
+  top: 34px;
+  width: 40px;
+  height: 36px;
+  border-radius: 0 0 999px 999px;
+  background: linear-gradient(180deg, rgba(150, 95, 55, 0.65), rgba(90, 50, 25, 0.95));
+  box-shadow: inset 0 8px 10px rgba(0, 0, 0, 0.3);
+}
+
+.fortune-cookie-chip {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  width: 74px;
+  height: 64px;
+  border-radius: 60% 40% 55% 45%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), transparent 45%),
+    linear-gradient(150deg, var(--color-cookie-light), var(--color-cookie-base) 55%, var(--color-cookie-dark));
+  box-shadow: 0 10px 16px rgba(24, 14, 8, 0.2);
+  clip-path: polygon(0 18%, 60% 6%, 100% 30%, 92% 85%, 30% 100%, 0 70%);
+  transform: translateX(80px) translateY(30px) rotate(10deg);
   opacity: 0;
-  transform: translateY(-8px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: transform 0.6s ease, opacity 0.4s ease;
+  z-index: 2;
 }
 
-.cookie-crack[data-cracked="true"] .cookie-crumbs {
+.fortune-strip {
+  position: absolute;
+  left: 0;
+  top: 86px;
+  width: 320px;
+  height: 70px;
+  border-radius: 50px;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.95), rgba(255, 245, 230, 0.95));
+  box-shadow:
+    0 12px 20px rgba(14, 10, 6, 0.2),
+    inset 0 0 0 2px rgba(220, 200, 180, 0.4);
+  transform: rotate(-2deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: #c23b2b;
+  letter-spacing: 0.12em;
+  padding: 0 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform 0.6s ease, width 0.6s ease, left 0.6s ease;
+  z-index: 1;
+}
+
+.fortune-strip::before,
+.fortune-strip::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  width: 150px;
+  height: 54px;
+  border-radius: 40px;
+  background: inherit;
+  box-shadow: inherit;
+  transition: width 0.6s ease, left 0.6s ease, right 0.6s ease;
+}
+
+.fortune-strip::before {
+  left: -120px;
+  transform: rotate(3deg);
+}
+
+.fortune-strip::after {
+  right: -120px;
+  transform: rotate(-2deg);
+}
+
+.cookie-crack[data-cracked="true"] .fortune-cookie-body {
+  transform: translateX(-18px) rotate(-8deg);
+}
+
+.cookie-crack[data-cracked="true"] .fortune-cookie-chip {
+  transform: translateX(90px) translateY(44px) rotate(18deg);
   opacity: 1;
-  transform: translateY(0);
+}
+
+.cookie-crack[data-cracked="true"] .fortune-strip {
+  width: 380px;
+  transform: rotate(-4deg) translateX(20px);
+}
+
+.cookie-crack[data-cracked="true"] .fortune-strip::after {
+  right: -160px;
+  width: 190px;
+}
+
+.cookie-crack[data-cracked="true"] .fortune-strip::before {
+  left: -160px;
+  width: 190px;
 }
 
 @keyframes float-up {
