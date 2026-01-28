@@ -1,22 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import submitContactAction from "@/app/actions/submit-contact";
 import contactFormSchema from "@/models/dto/contact-form.dto";
-
-type ContactFormData = z.infer<typeof contactFormSchema>;
+import type { ContactFormData } from "@/models/types/contact-form";
 
 type SubmissionState = {
   readonly isSubmitted: boolean;
   readonly submittedAt: string | null;
+  readonly errorMessage: string | null;
 };
 
 export default function ContactPage(): JSX.Element {
   const [submissionState, setSubmissionState] = useState<SubmissionState>({
     isSubmitted: false,
     submittedAt: null,
+    errorMessage: null,
   });
   const {
     register,
@@ -33,17 +34,23 @@ export default function ContactPage(): JSX.Element {
     },
   });
 
-  const onSubmit = async (data: ContactFormData): Promise<void> => {
-    await new Promise((resolve) => {
-      setTimeout(resolve, 400);
-    });
+  async function handleSubmitContact(data: ContactFormData): Promise<void> {
+    const response = await submitContactAction({ data });
+    if (response.success && response.data) {
+      setSubmissionState({
+        isSubmitted: true,
+        submittedAt: response.data.submittedAt,
+        errorMessage: null,
+      });
+      reset();
+      return;
+    }
     setSubmissionState({
-      isSubmitted: true,
-      submittedAt: new Date().toISOString(),
+      isSubmitted: false,
+      submittedAt: null,
+      errorMessage: response.error?.detail ?? "문의 접수에 실패했습니다.",
     });
-    reset();
-    console.info("문의 접수", data);
-  };
+  }
 
   return (
     <main className="background-canvas min-h-screen px-6 py-16">
@@ -58,7 +65,7 @@ export default function ContactPage(): JSX.Element {
         </header>
         <form
           className="space-y-6 rounded-3xl border border-ink/10 bg-paper/80 p-6 shadow-[var(--shadow-soft)]"
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(handleSubmitContact)}
         >
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2 text-sm text-muted">
@@ -121,6 +128,11 @@ export default function ContactPage(): JSX.Element {
             <p className="mt-2">
               접수 시각: {submissionState.submittedAt}
             </p>
+          </section>
+        )}
+        {submissionState.errorMessage && (
+          <section className="rounded-3xl border border-ember/30 bg-paper p-4 text-sm text-ember">
+            {submissionState.errorMessage}
           </section>
         )}
       </div>

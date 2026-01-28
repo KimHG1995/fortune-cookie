@@ -1,9 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import useSWR from "swr";
-import requestFortune from "@/lib/services/fortune-service";
-import type { ApiResponse } from "@/models/types/api-response";
+import { useRef, useState, useTransition } from "react";
+import requestFortuneAction from "@/app/actions/request-fortune";
 import type { FortuneRequest } from "@/models/types/fortune-request";
 import type { FortuneResult } from "@/models/types/fortune";
 
@@ -37,7 +35,7 @@ type FortuneCardProps = {
   readonly fortune: FortuneResult | null;
 };
 
-const createNoiseBuffer = (context: AudioContext): AudioBuffer => {
+function createNoiseBuffer(context: AudioContext): AudioBuffer {
   const duration = 0.2;
   const frameCount = Math.floor(context.sampleRate * duration);
   const buffer = context.createBuffer(1, frameCount, context.sampleRate);
@@ -47,9 +45,9 @@ const createNoiseBuffer = (context: AudioContext): AudioBuffer => {
     data[index] = (Math.random() * 2 - 1) * fade;
   }
   return buffer;
-};
+}
 
-const playCrackSound = (context: AudioContext): void => {
+function playCrackSound(context: AudioContext): void {
   const source = context.createBufferSource();
   const filter = context.createBiquadFilter();
   const gain = context.createGain();
@@ -59,20 +57,20 @@ const playCrackSound = (context: AudioContext): void => {
   gain.gain.value = 0.5;
   source.connect(filter).connect(gain).connect(context.destination);
   source.start();
-};
+}
 
-const useAudioContext = (): { play: () => void } => {
+function useAudioContext(): { play: () => void } {
   const audioContextRef = useRef<AudioContext | null>(null);
-  const play = (): void => {
+  function play(): void {
     const context = audioContextRef.current ?? new AudioContext();
     audioContextRef.current = context;
     if (context.state === "suspended") {
       void context.resume();
     }
     playCrackSound(context);
-  };
+  }
   return { play };
-};
+}
 
 const FortuneSelector = (props: SelectorProps): JSX.Element => {
   return (
@@ -218,38 +216,11 @@ const FortuneCard = (props: FortuneCardProps): JSX.Element => {
 export default function FortuneCookie(): JSX.Element {
   const [selectedCategory, setSelectedCategory] = useState<string>(jobCategories[0]);
   const [selectedTone, setSelectedTone] = useState<FortuneRequest["tone"]>("차분함");
-  const [pendingRequest, setPendingRequest] = useState<FortuneRequest | null>(null);
   const [isCracked, setIsCracked] = useState<boolean>(false);
+  const [fortune, setFortune] = useState<FortuneResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoading, startTransition] = useTransition();
   const { play } = useAudioContext();
-
-  const requestKey: readonly [string, FortuneRequest] | null = pendingRequest
-    ? ["fortune", pendingRequest]
-    : null;
-
-  const fetcher = async (
-    key: readonly [string, FortuneRequest],
-  ): Promise<ApiResponse<FortuneResult>> => {
-    const [, request] = key;
-    return requestFortune({ request });
-  };
-
-  const { data, isLoading } = useSWR(requestKey, fetcher, {
-    revalidateOnFocus: false,
-  });
-
-  const fortune = useMemo<FortuneResult | null>(() => {
-    if (!data || !data.success) {
-      return null;
-    }
-    return data.data;
-  }, [data]);
-
-  const errorMessage = useMemo<string | null>(() => {
-    if (!data || data.success) {
-      return null;
-    }
-    return data.error?.detail ?? "요청에 실패했습니다.";
-  }, [data]);
 
   const triggerCrackAnimation = (): void => {
     setIsCracked(false);
@@ -258,11 +229,29 @@ export default function FortuneCookie(): JSX.Element {
     }, 30);
   };
 
-  const handleCrack = (): void => {
-    setPendingRequest({ jobCategory: selectedCategory, tone: selectedTone });
+  async function executeFortuneRequest(request: FortuneRequest): Promise<void> {
+    const response = await requestFortuneAction({ request });
+    if (response.success) {
+      setFortune(response.data);
+      setErrorMessage(null);
+      return;
+    }
+    setFortune(null);
+    setErrorMessage(response.error?.detail ?? "요청에 실패했습니다.");
+  }
+
+  function handleCrack(): void {
     triggerCrackAnimation();
     play();
-  };
+    setErrorMessage(null);
+    const request: FortuneRequest = {
+      jobCategory: selectedCategory,
+      tone: selectedTone,
+    };
+    startTransition(() => {
+      void executeFortuneRequest(request);
+    });
+  }
 
   return (
     <section className="grid gap-10 lg:grid-cols-[1.2fr_1fr]">
