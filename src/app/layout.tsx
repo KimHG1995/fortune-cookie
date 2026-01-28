@@ -1,0 +1,35 @@
+import type React from "react";
+import { Cormorant_Garamond, Space_Grotesk } from "next/font/google";
+import ErrorBoundary from "@/app/(core)/error-boundary";
+import SiteFooter from "@/app/components/site-footer";
+import SiteHeader from "@/app/components/site-header";
+import "./globals.css";
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
+
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-display",
+});
+
+type RootLayoutProps = {
+  readonly children: React.ReactNode;
+};
+
+export default function RootLayout({ children }: RootLayoutProps): JSX.Element {
+  return (
+    <html lang="ko">
+      <body className={`${spaceGrotesk.variable} ${cormorantGaramond.variable}`}>
+        <ErrorBoundary>
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </ErrorBoundary>
+      </body>
+    </html>
+  );
+}
