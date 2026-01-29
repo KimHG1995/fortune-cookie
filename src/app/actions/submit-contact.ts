@@ -5,13 +5,9 @@ import assertSameOrigin from "@/lib/core/assert-same-origin";
 import enforceDailyLimit from "@/lib/core/enforce-daily-limit";
 import createProblemDetails from "@/lib/core/create-problem-details";
 import submitContact from "@/lib/services/contact-service";
-import type { ApiResponse } from "@/models/types/api-response";
-import type { ContactSubmissionResult } from "@/models/types/contact-submission";
-import type { ContactFormData } from "@/models/types/contact-form";
-
-type SubmitContactInput = {
-  readonly data: ContactFormData;
-};
+import type { ApiResponse } from "@/models/types/api/api-response";
+import type { ContactSubmissionResult } from "@/models/types/contact/contact-submission-result";
+import type { SubmitContactInput } from "@/models/types/actions/submit-contact-input";
 
 const getAllowedOrigins = (requestHeaders: Headers): readonly string[] => {
   const rawOrigins = process.env.APP_ORIGINS;

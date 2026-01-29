@@ -1,15 +1,8 @@
 "use client";
 
 import React from "react";
-
-type ErrorBoundaryProps = {
-  readonly children: React.ReactNode;
-};
-
-type ErrorBoundaryState = {
-  readonly hasError: boolean;
-  readonly message: string;
-};
+import type { ErrorBoundaryProps } from "@/models/types/app/error-boundary-props";
+import type { ErrorBoundaryState } from "@/models/types/app/error-boundary-state";
 
 /**
  * 전역 UI 오류를 포착하고 사용자에게 안내하는 에러 바운더리입니다.

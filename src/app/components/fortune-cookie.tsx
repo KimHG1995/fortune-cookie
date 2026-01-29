@@ -4,8 +4,10 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import type { ReactElement } from "react";
 import requestFortuneAction from "@/app/actions/request-fortune";
 import FortuneCookieEmoji from "@/app/components/fortune-cookie-emoji";
-import type { FortuneRequest } from "@/models/types/fortune-request";
-import type { FortuneResult } from "@/models/types/fortune";
+import type { FortuneCookieCardProps } from "@/models/types/ui/fortune-cookie-card-props";
+import type { FortuneCookieSelectorProps } from "@/models/types/ui/fortune-cookie-selector-props";
+import type { FortuneRequest } from "@/models/types/fortune/fortune-request";
+import type { FortuneResult } from "@/models/types/fortune/fortune-result";
 
 const jobCategories: readonly string[] = [
   "기획",
@@ -21,21 +23,6 @@ const jobCategories: readonly string[] = [
 ];
 
 const toneOptions: readonly FortuneRequest["tone"][] = ["차분함", "유쾌함", "직설"];
-
-type SelectorProps = {
-  readonly selectedCategory: string;
-  readonly selectedTone: FortuneRequest["tone"];
-  readonly onSelectCategory: (value: string) => void;
-  readonly onSelectTone: (value: FortuneRequest["tone"]) => void;
-  readonly onCrack: () => void;
-  readonly isLoading: boolean;
-  readonly errorMessage: string | null;
-};
-
-type FortuneCardProps = {
-  readonly isCracked: boolean;
-  readonly fortune: FortuneResult | null;
-};
 
 function createNoiseBuffer(context: AudioContext, duration: number): AudioBuffer {
   const frameCount = Math.floor(context.sampleRate * duration);
@@ -239,7 +226,7 @@ function useCrackSound(): { play: () => void } {
   return { play };
 }
 
-const FortuneSelector = (props: SelectorProps): ReactElement => {
+const FortuneSelector = (props: FortuneCookieSelectorProps): ReactElement => {
   return (
     <div className="space-y-8">
       <div className="space-y-3">
@@ -312,7 +299,7 @@ const FortuneSelector = (props: SelectorProps): ReactElement => {
   );
 };
 
-const FortuneCard = (props: FortuneCardProps): ReactElement => {
+const FortuneCard = (props: FortuneCookieCardProps): ReactElement => {
   const stripText = props.fortune?.luckyKeyword ?? "GOOD LUCK";
 
   return (

@@ -1,4 +1,4 @@
-import type { ProblemDetails } from "@/models/types/problem-details";
+import type { ProblemDetails } from "@/models/types/api/problem-details";
 
 const createProblemDetails = (input: {
   type: string;

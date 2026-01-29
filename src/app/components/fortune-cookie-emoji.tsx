@@ -1,8 +1,5 @@
 import type { CSSProperties, ReactElement } from "react";
-
-type FortuneCookieEmojiProps = {
-  readonly stripText?: string;
-};
+import type { FortuneCookieEmojiProps } from "@/models/types/ui/fortune-cookie-emoji-props";
 
 const cardStyle: CSSProperties = {
   width: "min(980px, 100%)",

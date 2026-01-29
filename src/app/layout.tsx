@@ -1,8 +1,9 @@
-import type { ReactElement, ReactNode } from "react";
+import type { ReactElement } from "react";
 import { Cormorant_Garamond, Space_Grotesk } from "next/font/google";
 import ErrorBoundary from "@/app/(core)/error-boundary";
 import SiteFooter from "@/app/components/site-footer";
 import SiteHeader from "@/app/components/site-header";
+import type { RootLayoutProps } from "@/models/types/app/root-layout-props";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -15,10 +16,6 @@ const cormorantGaramond = Cormorant_Garamond({
   weight: ["400", "600", "700"],
   variable: "--font-display",
 });
-
-type RootLayoutProps = {
-  readonly children: ReactNode;
-};
 
 export default function RootLayout({ children }: RootLayoutProps): ReactElement {
   return (

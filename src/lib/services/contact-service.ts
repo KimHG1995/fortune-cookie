@@ -2,9 +2,9 @@ import "server-only";
 
 import contactFormSchema from "@/models/dto/contact-form.dto";
 import createProblemDetails from "@/lib/core/create-problem-details";
-import type { ApiResponse } from "@/models/types/api-response";
-import type { ContactSubmissionResult } from "@/models/types/contact-submission";
-import type { ContactFormData } from "@/models/types/contact-form";
+import type { ApiResponse } from "@/models/types/api/api-response";
+import type { ContactSubmissionResult } from "@/models/types/contact/contact-submission-result";
+import type { ContactFormData } from "@/models/types/contact/contact-form-data";
 
 const createSuccessResponse = (
   data: ContactSubmissionResult,

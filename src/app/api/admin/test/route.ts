@@ -1,12 +1,8 @@
 import createJsonResponse from "@/lib/core/create-json-response";
-import type { ApiResponse } from "@/models/types/api-response";
+import type { ApiResponse } from "@/models/types/api/api-response";
+import type { AdminTestPayload } from "@/models/types/admin/admin-test-payload";
 
-type TestPayload = {
-  readonly status: "ok";
-  readonly timestamp: string;
-};
-
-const createSuccessResponse = (): ApiResponse<TestPayload> => {
+const createSuccessResponse = (): ApiResponse<AdminTestPayload> => {
   return {
     success: true,
     data: {

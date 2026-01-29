@@ -6,17 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import submitContactAction from "@/app/actions/submit-contact";
 import contactFormSchema from "@/models/dto/contact-form.dto";
-import type { ContactFormData } from "@/models/types/contact-form";
-
-type SubmissionState = {
-  readonly isSubmitted: boolean;
-  readonly submittedAt: string | null;
-};
-
-type StoredSubmission = {
-  readonly date: string;
-  readonly submittedAt: string;
-};
+import type { ContactSubmissionState } from "@/models/types/contact/contact-submission-state";
+import type { StoredContactSubmission } from "@/models/types/contact/contact-submission-storage";
+import type { ContactFormData } from "@/models/types/contact/contact-form-data";
 
 const storageKey = "contact:daily";
 
@@ -24,7 +16,7 @@ const isRecord = (input: unknown): input is Record<string, unknown> => {
   return typeof input === "object" && input !== null;
 };
 
-const isStoredSubmission = (input: unknown): input is StoredSubmission => {
+const isStoredSubmission = (input: unknown): input is StoredContactSubmission => {
   if (!isRecord(input)) {
     return false;
   }
@@ -32,7 +24,7 @@ const isStoredSubmission = (input: unknown): input is StoredSubmission => {
 };
 
 export default function ContactPage(): ReactElement {
-  const [submissionState, setSubmissionState] = useState<SubmissionState>({
+  const [submissionState, setSubmissionState] = useState<ContactSubmissionState>({
     isSubmitted: false,
     submittedAt: null,
   });
@@ -74,7 +66,7 @@ export default function ContactPage(): ReactElement {
         isSubmitted: true,
         submittedAt: response.data.submittedAt,
       });
-      const payload: StoredSubmission = {
+      const payload: StoredContactSubmission = {
         date: todayKey,
         submittedAt: response.data.submittedAt,
       };

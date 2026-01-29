@@ -3,9 +3,9 @@ import "server-only";
 import createProblemDetails from "@/lib/core/create-problem-details";
 import fortuneRequestSchema from "@/models/dto/fortune-request.dto";
 import fortuneResultSchema from "@/models/dto/fortune-result.dto";
-import type { ApiResponse } from "@/models/types/api-response";
-import type { FortuneRequest } from "@/models/types/fortune-request";
-import type { FortuneResult } from "@/models/types/fortune";
+import type { ApiResponse } from "@/models/types/api/api-response";
+import type { FortuneRequest } from "@/models/types/fortune/fortune-request";
+import type { FortuneResult } from "@/models/types/fortune/fortune-result";
 
 type CacheEntry = {
   readonly value: ApiResponse<FortuneResult>;
