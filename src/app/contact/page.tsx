@@ -11,16 +11,31 @@ import type { ContactFormData } from "@/models/types/contact-form";
 type SubmissionState = {
   readonly isSubmitted: boolean;
   readonly submittedAt: string | null;
-  readonly errorMessage: string | null;
+};
+
+type StoredSubmission = {
+  readonly date: string;
+  readonly submittedAt: string;
+};
+
+const storageKey = "contact:daily";
+
+const isRecord = (input: unknown): input is Record<string, unknown> => {
+  return typeof input === "object" && input !== null;
+};
+
+const isStoredSubmission = (input: unknown): input is StoredSubmission => {
+  if (!isRecord(input)) {
+    return false;
+  }
+  return typeof input.date === "string" && typeof input.submittedAt === "string";
 };
 
 export default function ContactPage(): ReactElement {
   const [submissionState, setSubmissionState] = useState<SubmissionState>({
     isSubmitted: false,
     submittedAt: null,
-    errorMessage: null,
   });
-  const storageKey = "contact:daily";
   const {
     register,
     handleSubmit,
@@ -38,31 +53,34 @@ export default function ContactPage(): ReactElement {
 
   async function handleSubmitContact(data: ContactFormData): Promise<void> {
     const todayKey = new Date().toISOString().slice(0, 10);
-    const storedDate = localStorage.getItem(storageKey);
-    if (storedDate === todayKey) {
-      setSubmissionState({
-        isSubmitted: false,
-        submittedAt: null,
-        errorMessage: "문의는 하루에 한 번만 가능합니다.",
-      });
-      return;
+    const storedRaw = localStorage.getItem(storageKey);
+    if (storedRaw) {
+      try {
+        const parsed: unknown = JSON.parse(storedRaw);
+        if (isStoredSubmission(parsed) && parsed.date === todayKey) {
+          setSubmissionState({
+            isSubmitted: true,
+            submittedAt: parsed.submittedAt,
+          });
+          return;
+        }
+      } catch {
+        localStorage.removeItem(storageKey);
+      }
     }
     const response = await submitContactAction({ data });
     if (response.success && response.data) {
       setSubmissionState({
         isSubmitted: true,
         submittedAt: response.data.submittedAt,
-        errorMessage: null,
       });
-      localStorage.setItem(storageKey, todayKey);
+      const payload: StoredSubmission = {
+        date: todayKey,
+        submittedAt: response.data.submittedAt,
+      };
+      localStorage.setItem(storageKey, JSON.stringify(payload));
       reset();
-      return;
     }
-    setSubmissionState({
-      isSubmitted: false,
-      submittedAt: null,
-      errorMessage: response.error?.detail ?? "문의 접수에 실패했습니다.",
-    });
   }
 
   return (
@@ -141,11 +159,6 @@ export default function ContactPage(): ReactElement {
             <p className="mt-2">
               접수 시각: {submissionState.submittedAt}
             </p>
-          </section>
-        )}
-        {submissionState.errorMessage && (
-          <section className="rounded-3xl border border-ember/30 bg-paper p-4 text-sm text-ember">
-            {submissionState.errorMessage}
           </section>
         )}
       </div>
