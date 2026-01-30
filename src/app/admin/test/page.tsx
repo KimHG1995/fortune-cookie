@@ -11,7 +11,7 @@ export default function AdminTestPage(): ReactElement {
           이 페이지가 정상 렌더링되면 CSR 기준의 화면 테스트가 통과됩니다.
         </p>
         <p className="text-sm text-muted">
-          API 상태는 <span className="text-ink">/api/admin/test</span>에서 확인하세요.
+          별도의 API 테스트는 제공하지 않습니다.
         </p>
       </div>
     </main>

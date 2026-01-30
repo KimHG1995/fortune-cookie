@@ -22,7 +22,7 @@ const getClientKey = (headers: Headers): string => {
   return `${ip}|${userAgent}`;
 };
 
-export default function enforceDailyLimit(input: DailyLimitInput): void {
+export default function executeDailyLimitEnforcement(input: DailyLimitInput): void {
   const dateKey = getTodayKey();
   const clientKey = getClientKey(input.headers);
   const storeKey = `${input.action}|${dateKey}|${clientKey}`;

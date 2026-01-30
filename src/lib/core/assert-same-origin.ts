@@ -22,7 +22,7 @@ const isAllowedHost = (host: string, allowedOrigins: readonly string[]): boolean
   });
 };
 
-export default function assertSameOrigin(input: AssertSameOriginInput): void {
+export default function executeSameOriginAssertion(input: AssertSameOriginInput): void {
   const origin = input.headers.get("origin");
   const referer = input.headers.get("referer");
   const fetchSite = input.headers.get("sec-fetch-site");

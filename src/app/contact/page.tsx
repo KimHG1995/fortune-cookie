@@ -6,22 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import submitContactAction from "@/app/actions/submit-contact";
 import contactFormSchema from "@/models/dto/contact-form.dto";
+import contactSubmissionStorage from "@/lib/services/contact-submission-storage";
 import type { ContactSubmissionState } from "@/models/types/contact/contact-submission-state";
 import type { StoredContactSubmission } from "@/models/types/contact/contact-submission-storage";
 import type { ContactFormData } from "@/models/types/contact/contact-form-data";
-
-const storageKey = "contact:daily";
-
-const isRecord = (input: unknown): input is Record<string, unknown> => {
-  return typeof input === "object" && input !== null;
-};
-
-const isStoredSubmission = (input: unknown): input is StoredContactSubmission => {
-  if (!isRecord(input)) {
-    return false;
-  }
-  return typeof input.date === "string" && typeof input.submittedAt === "string";
-};
 
 export default function ContactPage(): ReactElement {
   const [submissionState, setSubmissionState] = useState<ContactSubmissionState>({
@@ -43,36 +31,29 @@ export default function ContactPage(): ReactElement {
     },
   });
 
-  async function handleSubmitContact(data: ContactFormData): Promise<void> {
-    const todayKey = new Date().toISOString().slice(0, 10);
-    const storedRaw = localStorage.getItem(storageKey);
-    if (storedRaw) {
-      try {
-        const parsed: unknown = JSON.parse(storedRaw);
-        if (isStoredSubmission(parsed) && parsed.date === todayKey) {
-          setSubmissionState({
-            isSubmitted: true,
-            submittedAt: parsed.submittedAt,
-          });
-          return;
-        }
-      } catch {
-        localStorage.removeItem(storageKey);
-      }
-    }
-    const response = await submitContactAction({ data });
-    if (response.success && response.data) {
+  async function executeContactSubmit(data: ContactFormData): Promise<void> {
+    const storedSubmission = contactSubmissionStorage.readStoredSubmission();
+    if (storedSubmission) {
       setSubmissionState({
         isSubmitted: true,
-        submittedAt: response.data.submittedAt,
+        submittedAt: storedSubmission.submittedAt,
       });
-      const payload: StoredContactSubmission = {
-        date: todayKey,
-        submittedAt: response.data.submittedAt,
-      };
-      localStorage.setItem(storageKey, JSON.stringify(payload));
-      reset();
+      return;
     }
+    const response = await submitContactAction({ data });
+    if (!response.success || !response.data) {
+      return;
+    }
+    setSubmissionState({
+      isSubmitted: true,
+      submittedAt: response.data.submittedAt,
+    });
+    const payload: StoredContactSubmission = {
+      date: new Date().toISOString().slice(0, 10),
+      submittedAt: response.data.submittedAt,
+    };
+    contactSubmissionStorage.saveStoredSubmission(payload);
+    reset();
   }
 
   return (
@@ -88,7 +69,7 @@ export default function ContactPage(): ReactElement {
         </header>
         <form
           className="space-y-6 rounded-3xl border border-ink/10 bg-paper/80 p-6 shadow-[var(--shadow-soft)]"
-          onSubmit={handleSubmit(handleSubmitContact)}
+          onSubmit={handleSubmit(executeContactSubmit)}
         >
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2 text-sm text-muted">

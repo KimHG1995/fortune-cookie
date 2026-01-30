@@ -1,8 +1,8 @@
 "use server";
 
 import { headers } from "next/headers";
-import assertSameOrigin from "@/lib/core/assert-same-origin";
-import enforceDailyLimit from "@/lib/core/enforce-daily-limit";
+import executeSameOriginAssertion from "@/lib/core/assert-same-origin";
+import executeDailyLimitEnforcement from "@/lib/core/enforce-daily-limit";
 import createProblemDetails from "@/lib/core/create-problem-details";
 import submitContact from "@/lib/services/contact-service";
 import type { ApiResponse } from "@/models/types/api/api-response";
@@ -53,11 +53,11 @@ const submitContactAction = async (
 ): Promise<ApiResponse<ContactSubmissionResult>> => {
   try {
     const requestHeaders = await headers();
-    assertSameOrigin({
+    executeSameOriginAssertion({
       headers: requestHeaders,
       allowedOrigins: getAllowedOrigins(requestHeaders),
     });
-    enforceDailyLimit({
+    executeDailyLimitEnforcement({
       headers: requestHeaders,
       action: "contact",
       maxPerDay: 1,
