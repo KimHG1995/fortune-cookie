@@ -13,7 +13,7 @@ export default function FortuneCookieCard(
       data-cracked={props.isCracked}
     >
       <div className="paper-grid rounded-2xl p-6">
-        <FortuneCookieEmoji stripText={stripText} />
+        <FortuneCookieEmoji stripText={stripText} isCracked={props.isCracked} />
         <div className="mt-6 space-y-4 text-sm text-muted">
           <p className="text-xs uppercase tracking-[0.2em] text-muted">오늘의 포춘</p>
           {props.fortune ? (
