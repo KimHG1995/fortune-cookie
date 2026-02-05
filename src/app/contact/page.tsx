@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import submitContactAction from "@/app/actions/submit-contact";
 import contactFormSchema from "@/models/dto/contact-form.dto";
+import clarityService from "@/lib/services/clarity-service";
 import contactSubmissionStorage from "@/lib/services/contact-submission-storage";
 import type { ContactSubmissionState } from "@/models/types/contact/contact-submission-state";
 import type { StoredContactSubmission } from "@/models/types/contact/contact-submission-storage";
@@ -38,6 +39,7 @@ export default function ContactPage(): ReactElement {
         isSubmitted: true,
         submittedAt: storedSubmission.submittedAt,
       });
+      clarityService.executeClarityEvent("contact_submit_duplicate");
       return;
     }
     const response = await submitContactAction({ data });
@@ -48,6 +50,7 @@ export default function ContactPage(): ReactElement {
       isSubmitted: true,
       submittedAt: response.data.submittedAt,
     });
+    clarityService.executeClarityEvent("contact_submit_success");
     const payload: StoredContactSubmission = {
       date: new Date().toISOString().slice(0, 10),
       submittedAt: response.data.submittedAt,
@@ -61,10 +64,10 @@ export default function ContactPage(): ReactElement {
       <div className="mx-auto w-full max-w-4xl space-y-10">
         <header className="space-y-3">
           <p className="text-sm uppercase tracking-[0.3em] text-muted">문의</p>
-          <h1 className="text-4xl font-semibold text-ink">대화를 남겨 주세요.</h1>
+          <h1 className="text-4xl font-semibold text-ink">문의 내용을 남겨 주세요.</h1>
           <p className="text-base text-muted">
             기능 제안, 제휴, 오류 제보 모두 환영합니다. 메시지는 팀 내부에서만
-            확인하며 외부에 공유하지 않습니다.
+            확인하며 외부로 공유하지 않습니다.
           </p>
         </header>
         <form
@@ -88,11 +91,11 @@ export default function ContactPage(): ReactElement {
               <input
                 {...register("email")}
                 className="w-full rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-ink focus:outline-none focus:ring-[var(--ring-glow)]"
-                placeholder="hello@fortune.com"
-              />
-              {errors.email && (
-                <span className="text-xs text-ember">{errors.email.message}</span>
-              )}
+              placeholder="hello@fortune.com"
+            />
+            {errors.email && (
+              <span className="text-xs text-ember">{errors.email.message}</span>
+            )}
             </label>
           </div>
           <label className="space-y-2 text-sm text-muted">
@@ -100,7 +103,7 @@ export default function ContactPage(): ReactElement {
             <input
               {...register("topic")}
               className="w-full rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-ink focus:outline-none focus:ring-[var(--ring-glow)]"
-              placeholder="광고 제휴, 기능 제안 등"
+              placeholder="제휴, 기능 제안, 오류 제보 등"
             />
             {errors.topic && (
               <span className="text-xs text-ember">{errors.topic.message}</span>
@@ -112,7 +115,7 @@ export default function ContactPage(): ReactElement {
               {...register("message")}
               rows={5}
               className="w-full rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-ink focus:outline-none focus:ring-[var(--ring-glow)]"
-              placeholder="구체적인 상황과 요청을 적어 주세요."
+              placeholder="상황과 요청을 구체적으로 적어 주세요."
             />
             {errors.message && (
               <span className="text-xs text-ember">{errors.message.message}</span>
@@ -123,12 +126,14 @@ export default function ContactPage(): ReactElement {
             className="w-full rounded-full bg-ink px-6 py-4 text-base font-semibold text-paper transition hover:translate-y-[-2px]"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "전송 중..." : "문의 보내기"}
+            {isSubmitting ? "전송 중..." : "문의 전송하기"}
           </button>
         </form>
         {submissionState.isSubmitted && (
           <section className="rounded-3xl border border-ink/10 bg-surface p-6 text-sm text-muted">
-            <p className="text-ink">문의가 접수되었습니다.</p>
+            <p className="text-ink">
+              문의가 접수되었습니다. 가능한 빠르게 답변드리겠습니다.
+            </p>
             <p className="mt-2">
               접수 시각: {submissionState.submittedAt}
             </p>

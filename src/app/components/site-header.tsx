@@ -10,7 +10,7 @@ export default function SiteHeader(): ReactElement {
             포춘 브레이커
           </Link>
           <p className="text-sm text-muted">
-            직업을 쪼개고, 오늘 할 일을 선명하게 만드는 포춘쿠키 실험실
+            직무를 정리하고 오늘의 행동을 선명하게 만드는 포춘쿠키 실험실
           </p>
         </div>
         <nav className="flex flex-wrap items-center gap-4 text-sm text-muted">

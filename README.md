@@ -14,9 +14,11 @@ pnpm dev
 
 ```bash
 GEMINI_API_KEY=your_api_key
+NEXT_PUBLIC_CLARITY_ID=your_clarity_id
 ```
 
-키가 없으면 로컬 폴백 운세가 제공됩니다.
+키가 없으면 로컬 폴백 운세가 제공됩니다. Clarity는 `NEXT_PUBLIC_CLARITY_ID`가
+설정된 경우에만 로드됩니다.
 
 ## 주요 페이지
 

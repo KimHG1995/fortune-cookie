@@ -7,6 +7,7 @@ import FortuneCookieCard from "@/app/components/fortune-cookie-card";
 import FortuneCookieSelector from "@/app/components/fortune-cookie-selector";
 import fortuneOptions from "@/lib/core/fortune-options";
 import useCrackSound from "@/lib/core/use-crack-sound";
+import clarityService from "@/lib/services/clarity-service";
 import fortuneStorage from "@/lib/services/fortune-storage";
 import type { FortuneRequest } from "@/models/types/fortune/fortune-request";
 import type { FortuneResult } from "@/models/types/fortune/fortune-result";
@@ -48,19 +49,23 @@ export default function FortuneCookie(): ReactElement {
         fortuneStorage.saveStoredFortune(response.data);
       }
       setErrorMessage(null);
+      clarityService.executeClarityEvent("fortune_success");
       return;
     }
     setFortune(null);
     setErrorMessage(response.error?.detail ?? "요청에 실패했습니다.");
+    clarityService.executeClarityEvent("fortune_error");
   }
 
   function executeCrack(): void {
+    clarityService.executeClarityEvent("fortune_crack");
     executeCrackAnimation();
     executeCrackSound();
     setErrorMessage(null);
     const storedFortune = fortuneStorage.readStoredFortune();
     if (storedFortune) {
       setFortune(storedFortune);
+      clarityService.executeClarityEvent("fortune_success");
       return;
     }
     const request: FortuneRequest = {

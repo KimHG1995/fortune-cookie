@@ -2,14 +2,14 @@ import type { FortuneRequest } from "@/models/types/fortune/fortune-request";
 import type { FortuneResult } from "@/models/types/fortune/fortune-result";
 
 const actionOptions: readonly string[] = [
-  "오늘은 30분만 집중해서 핵심 업무를 끝낸 뒤, 남은 시간은 내일을 위한 정리로 마무리해 보세요.",
+  "오늘은 30분만 집중해 핵심 업무를 끝내고, 남은 시간은 내일 준비로 마무리해 보세요.",
   "결정은 빠르게, 실행은 작게 시작하세요. 작은 성공이 리듬을 만듭니다.",
   "대화로 막힌 흐름을 푸는 날입니다. 점심 전 짧은 피드백 요청이 열쇠가 됩니다.",
-  "하루 중 가장 에너지가 높은 시간을 캘린더에 고정하고, 그 시간에만 중요한 일을 배치하세요.",
-  "작업을 시작하기 전 10분만 목표를 다시 정리하면 불필요한 수정이 줄어듭니다.",
+  "에너지가 가장 높은 시간을 캘린더에 고정하고, 그 시간에만 중요한 일을 배치하세요.",
+  "시작 전에 목표를 10분만 다시 정리하면 불필요한 수정을 줄일 수 있습니다.",
   "작은 개선을 즉시 반영하세요. 오늘의 빠른 리팩터링이 다음 주의 시간을 벌어줍니다.",
   "한 가지 지표를 정해 추적해 보세요. 숫자가 방향을 선명하게 만들어줍니다.",
-  "오늘은 ‘완료’가 핵심입니다. 진행 중인 일을 하나라도 끝내 보세요.",
+  "오늘의 핵심은 ‘완료’입니다. 진행 중인 일을 하나라도 끝내 보세요.",
   "의견을 구할 사람을 한 명만 정하고 집중적으로 대화해 보세요.",
   "문서 한 장으로 정리해 공유하면 협업 속도가 확실히 올라갑니다.",
 ];
@@ -75,8 +75,8 @@ export default function createFallbackFortune(
 ): FortuneResult {
   const actionIndex = createRandomIndex(actionOptions.length);
   return {
-    title: `${request.jobCategory}의 흐름이 정리되는 날`,
-    summary: `${request.jobCategory} 분야에서 방향성이 분명해집니다. 톤은 ${request.tone}에 맞춰 안정적인 속도로 가는 것이 좋습니다.`,
+    title: `${request.jobCategory}의 흐름이 정돈되는 날`,
+    summary: `${request.jobCategory} 분야에서 방향이 선명해집니다. 오늘은 ${request.tone} 톤으로 리듬을 맞추면 안정적으로 흘러갑니다.`,
     action: actionOptions[actionIndex],
     caution: pickRandomItem(cautionOptions),
     luckyKeyword: pickRandomItem(keywordOptions),

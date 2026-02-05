@@ -15,39 +15,41 @@ export default function FortuneCookieCard(
       <div className="paper-grid rounded-2xl p-6">
         <FortuneCookieEmoji stripText={stripText} isCracked={props.isCracked} />
         <div className="mt-6 space-y-4 text-sm text-muted">
-          <p className="text-xs uppercase tracking-[0.2em] text-muted">오늘의 포춘</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted">
+            오늘의 포춘 리포트
+          </p>
           {props.fortune ? (
             <div className="space-y-3">
               <p className="text-lg font-semibold text-ink">{props.fortune.title}</p>
               <p>{props.fortune.summary}</p>
               <div className="rounded-2xl border border-ink/10 bg-paper p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-muted">
-                  오늘의 실행
+                  오늘의 실행 한 줄
                 </p>
                 <p className="mt-2 text-sm text-ink">{props.fortune.action}</p>
               </div>
               <p className="text-sm">{props.fortune.caution}</p>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="rounded-xl border border-ink/10 bg-paper p-3">
-                  <p className="text-muted">키워드</p>
+                  <p className="text-muted">행운 키워드</p>
                   <p className="mt-1 font-semibold text-ink">
                     {props.fortune.luckyKeyword}
                   </p>
                 </div>
                 <div className="rounded-xl border border-ink/10 bg-paper p-3">
-                  <p className="text-muted">색</p>
+                  <p className="text-muted">행운 색</p>
                   <p className="mt-1 font-semibold text-ink">
                     {props.fortune.luckyColor}
                   </p>
                 </div>
                 <div className="rounded-xl border border-ink/10 bg-paper p-3">
-                  <p className="text-muted">숫자</p>
+                  <p className="text-muted">행운 숫자</p>
                   <p className="mt-1 font-semibold text-ink">
                     {props.fortune.luckyNumber}
                   </p>
                 </div>
                 <div className="rounded-xl border border-ink/10 bg-paper p-3">
-                  <p className="text-muted">시간</p>
+                  <p className="text-muted">행운 시간</p>
                   <p className="mt-1 font-semibold text-ink">
                     {props.fortune.luckyTime}
                   </p>
@@ -55,7 +57,7 @@ export default function FortuneCookieCard(
               </div>
             </div>
           ) : (
-            <p>쿠키를 깨면 결과가 나타납니다.</p>
+            <p>쿠키를 열면 오늘의 포춘이 표시됩니다.</p>
           )}
         </div>
       </div>
