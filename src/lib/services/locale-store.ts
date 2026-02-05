@@ -11,6 +11,13 @@ const isLocale = (value: unknown): value is Locale => {
   return value === "ko" || value === "en";
 };
 
+let currentLocale: Locale = defaultLocale;
+const listeners = new Set<LocaleListener>();
+
+const getLocale = (): Locale => {
+  return currentLocale;
+};
+
 const readStoredLocale = (): Locale => {
   if (typeof window === "undefined") {
     return defaultLocale;
@@ -22,13 +29,13 @@ const readStoredLocale = (): Locale => {
   return isLocale(stored) ? stored : defaultLocale;
 };
 
-let currentLocale: Locale = defaultLocale;
-const listeners = new Set<LocaleListener>();
-
-const getLocale = (): Locale => {
+const syncLocale = (): void => {
   const stored = readStoredLocale();
+  if (stored === currentLocale) {
+    return;
+  }
   currentLocale = stored;
-  return currentLocale;
+  listeners.forEach((listener) => listener());
 };
 
 const setLocale = (locale: Locale): void => {
@@ -52,6 +59,7 @@ const subscribe = (listener: LocaleListener): (() => void) => {
 const localeStore = {
   getLocale,
   setLocale,
+  syncLocale,
   subscribe,
 };
 

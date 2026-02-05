@@ -16,6 +16,10 @@ export default function useLocale(): Locale {
   );
 
   useEffect(() => {
+    localeStore.syncLocale();
+  }, []);
+
+  useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
 

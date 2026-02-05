@@ -17,6 +17,10 @@ const createStorageKey = (locale: Locale): string => {
   return `fortune-cookie:daily:${locale}`;
 };
 
+const canUseStorage = (): boolean => {
+  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+};
+
 const createTodayKey = (): string => {
   return new Date().toISOString().slice(0, 10);
 };
@@ -45,6 +49,9 @@ function parseStoredFortune(raw: string): StoredFortune | null {
 }
 
 function readStoredFortune(locale: Locale): FortuneResult | null {
+  if (!canUseStorage()) {
+    return null;
+  }
   const raw = localStorage.getItem(createStorageKey(locale));
   if (!raw) {
     return null;
@@ -60,6 +67,9 @@ function readStoredFortune(locale: Locale): FortuneResult | null {
 }
 
 function saveStoredFortune(locale: Locale, fortune: FortuneResult): void {
+  if (!canUseStorage()) {
+    return;
+  }
   const payload: StoredFortune = {
     date: createTodayKey(),
     fortune,

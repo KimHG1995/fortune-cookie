@@ -11,58 +11,101 @@ import useLocale from "@/lib/core/use-locale";
 import useCrackSound from "@/lib/core/use-crack-sound";
 import clarityService from "@/lib/services/clarity-service";
 import fortuneStorage from "@/lib/services/fortune-storage";
+import type { Locale } from "@/models/types/app/locale";
 import type { FortuneRequest } from "@/models/types/fortune/fortune-request";
 import type { FortuneResult } from "@/models/types/fortune/fortune-result";
+
+type LocaleSelection = {
+  readonly category: string;
+  readonly tone: FortuneRequest["tone"];
+};
+
+type LocaleMap<T> = {
+  readonly [key in Locale]: T;
+};
+
+const createInitialSelections = (): LocaleMap<LocaleSelection> => {
+  return {
+    ko: {
+      category: fortuneOptions.jobCategories.ko[0],
+      tone: fortuneOptions.toneOptions.ko[0],
+    },
+    en: {
+      category: fortuneOptions.jobCategories.en[0],
+      tone: fortuneOptions.toneOptions.en[0],
+    },
+  };
+};
+
+const createInitialFortunes = (): LocaleMap<FortuneResult | null> => {
+  return { ko: null, en: null };
+};
+
+const createInitialCrackedState = (): LocaleMap<boolean> => {
+  return { ko: false, en: false };
+};
+
+const createInitialErrors = (): LocaleMap<string | null> => {
+  return { ko: null, en: null };
+};
 
 export default function FortuneCookie(): ReactElement {
   const locale = useLocale();
   const messages = localeMessages[locale];
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    fortuneOptions.jobCategories[locale][0],
+  const [selections, setSelections] = useState<LocaleMap<LocaleSelection>>(
+    createInitialSelections,
   );
-  const [selectedTone, setSelectedTone] = useState<FortuneRequest["tone"]>(
-    fortuneOptions.toneOptions[locale][0],
+  const [fortunes, setFortunes] = useState<LocaleMap<FortuneResult | null>>(
+    createInitialFortunes,
   );
-  const [isCracked, setIsCracked] = useState<boolean>(false);
-  const [fortune, setFortune] = useState<FortuneResult | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [crackedState, setCrackedState] = useState<LocaleMap<boolean>>(
+    createInitialCrackedState,
+  );
+  const [errors, setErrors] = useState<LocaleMap<string | null>>(
+    createInitialErrors,
+  );
   const [isLoading, startTransition] = useTransition();
   const { executeCrackSound } = useCrackSound();
+  const selection = selections[locale];
+  const fortune = fortunes[locale];
+  const isCracked = crackedState[locale];
+  const errorMessage = errors[locale];
 
   useEffect(() => {
-    setSelectedCategory(fortuneOptions.jobCategories[locale][0]);
-    setSelectedTone(fortuneOptions.toneOptions[locale][0]);
-    setErrorMessage(null);
     const storedFortune = fortuneStorage.readStoredFortune(locale);
     if (storedFortune) {
-      setFortune(storedFortune);
-      setIsCracked(true);
+      setFortunes((prev) => ({ ...prev, [locale]: storedFortune }));
+      setCrackedState((prev) => ({ ...prev, [locale]: true }));
       return;
     }
-    setFortune(null);
-    setIsCracked(false);
+    setFortunes((prev) =>
+      prev[locale] === null ? prev : { ...prev, [locale]: null },
+    );
+    setCrackedState((prev) =>
+      prev[locale] ? { ...prev, [locale]: false } : prev,
+    );
   }, [locale]);
 
   const executeCrackAnimation = (): void => {
-    setIsCracked(false);
+    setCrackedState((prev) => ({ ...prev, [locale]: false }));
     window.setTimeout(() => {
-      setIsCracked(true);
+      setCrackedState((prev) => ({ ...prev, [locale]: true }));
     }, 30);
   };
 
   async function executeFortuneRequest(request: FortuneRequest): Promise<void> {
     const response = await requestFortuneAction({ request });
     if (response.success) {
-      setFortune(response.data);
       if (response.data) {
+        setFortunes((prev) => ({ ...prev, [locale]: response.data }));
         fortuneStorage.saveStoredFortune(locale, response.data);
       }
-      setErrorMessage(null);
+      setErrors((prev) => ({ ...prev, [locale]: null }));
       clarityService.executeClarityEvent("fortune_success");
       return;
     }
-    setFortune(null);
-    setErrorMessage(messages.fortune.error);
+    setFortunes((prev) => ({ ...prev, [locale]: null }));
+    setErrors((prev) => ({ ...prev, [locale]: messages.fortune.error }));
     clarityService.executeClarityEvent("fortune_error");
   }
 
@@ -70,30 +113,49 @@ export default function FortuneCookie(): ReactElement {
     clarityService.executeClarityEvent("fortune_crack");
     executeCrackAnimation();
     executeCrackSound();
-    setErrorMessage(null);
+    setErrors((prev) => ({ ...prev, [locale]: null }));
     const storedFortune = fortuneStorage.readStoredFortune(locale);
     if (storedFortune) {
-      setFortune(storedFortune);
+      setFortunes((prev) => ({ ...prev, [locale]: storedFortune }));
+      setCrackedState((prev) => ({ ...prev, [locale]: true }));
       clarityService.executeClarityEvent("fortune_success");
       return;
     }
+    if (fortune) {
+      setFortunes((prev) => ({ ...prev, [locale]: null }));
+      setCrackedState((prev) => ({ ...prev, [locale]: false }));
+    }
     const request: FortuneRequest = {
       locale,
-      jobCategory: selectedCategory,
-      tone: selectedTone,
+      jobCategory: selection.category,
+      tone: selection.tone,
     };
     startTransition(() => {
       void executeFortuneRequest(request);
     });
   }
 
+  const handleSelectCategory = (value: string): void => {
+    setSelections((prev) => ({
+      ...prev,
+      [locale]: { ...prev[locale], category: value },
+    }));
+  };
+
+  const handleSelectTone = (value: FortuneRequest["tone"]): void => {
+    setSelections((prev) => ({
+      ...prev,
+      [locale]: { ...prev[locale], tone: value },
+    }));
+  };
+
   return (
     <section className="grid gap-10 lg:grid-cols-[1.2fr_1fr]">
       <FortuneCookieSelector
-        selectedCategory={selectedCategory}
-        selectedTone={selectedTone}
-        onSelectCategory={setSelectedCategory}
-        onSelectTone={setSelectedTone}
+        selectedCategory={selection.category}
+        selectedTone={selection.tone}
+        onSelectCategory={handleSelectCategory}
+        onSelectTone={handleSelectTone}
         onCrack={executeCrack}
         isLoading={isLoading}
         errorMessage={errorMessage}
