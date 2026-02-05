@@ -30,7 +30,7 @@ export default function RootLayout({ children }: RootLayoutProps): ReactElement 
   ) : null;
 
   return (
-    <html lang="ko">
+    <html lang="en">
       <head>{clarityScript}</head>
       <body className={`${spaceGrotesk.variable} ${cormorantGaramond.variable}`}>
         <ErrorBoundary>

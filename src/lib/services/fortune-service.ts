@@ -44,7 +44,7 @@ const createErrorResponse = (input: {
 };
 
 const createCacheKey = (request: FortuneRequest): string => {
-  return `${request.jobCategory}|${request.tone}`;
+  return `${request.locale}|${request.jobCategory}|${request.tone}`;
 };
 
 function readCache(
@@ -116,12 +116,27 @@ function extractJsonText(content: string): string | null {
   return content.slice(startIndex, endIndex + 1);
 }
 
-const buildSystemPrompt = (tone: FortuneRequest["tone"]): string => {
-  return `너는 포춘쿠키 운세 작가다. 톤은 ${tone}이며 한국어로 작성한다. 감정적 과장보다 현실적인 조언과 짧은 실행 지침을 준다. 결과는 반드시 JSON 객체만 출력한다.`;
+const buildSystemPrompt = (request: FortuneRequest): string => {
+  if (request.locale === "en") {
+    return `You are a fortune cookie writer. Write in English with a ${request.tone} tone. Avoid emotional exaggeration and give realistic advice with short, actionable guidance. Output only a JSON object.`;
+  }
+  return `너는 포춘쿠키 운세 작가다. 톤은 ${request.tone}이며 한국어로 작성한다. 감정적 과장보다 현실적인 조언과 짧은 실행 지침을 준다. 결과는 반드시 JSON 객체만 출력한다.`;
 };
 
-const buildUserPrompt = (jobCategory: string): string => {
-  return `직업 분야는 "${jobCategory}"이다. 아래 형식으로만 결과를 만들어라.\n\n{
+const buildUserPrompt = (request: FortuneRequest): string => {
+  if (request.locale === "en") {
+    return `The role is "${request.jobCategory}". Output only in the following JSON format.\n\n{
+  "title": "Within 40 characters",
+  "summary": "Within 200 characters",
+  "action": "Within 200 characters",
+  "caution": "Within 200 characters",
+  "luckyKeyword": "Within 20 characters",
+  "luckyColor": "Within 12 characters",
+  "luckyNumber": "Integer 0~99",
+  "luckyTime": "Time expression"
+}`;
+  }
+  return `직업 분야는 "${request.jobCategory}"이다. 아래 형식으로만 결과를 만들어라.\n\n{
   "title": "40자 이내",
   "summary": "200자 이내",
   "action": "200자 이내",
@@ -137,12 +152,12 @@ const createGeminiPayload = (request: FortuneRequest): Record<string, unknown> =
   return {
     systemInstruction: {
       role: "system",
-      parts: [{ text: buildSystemPrompt(request.tone) }],
+      parts: [{ text: buildSystemPrompt(request) }],
     },
     contents: [
       {
         role: "user",
-        parts: [{ text: buildUserPrompt(request.jobCategory) }],
+        parts: [{ text: buildUserPrompt(request) }],
       },
     ],
     generationConfig: {

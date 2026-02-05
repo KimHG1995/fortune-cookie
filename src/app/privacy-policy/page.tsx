@@ -1,66 +1,27 @@
 "use client";
 
 import type { ReactElement } from "react";
-
-const sections: readonly {
-  title: string;
-  items: readonly string[];
-}[] = [
-  {
-    title: "수집하는 정보",
-    items: [
-      "문의 페이지에서 입력하는 이름, 이메일, 메시지",
-      "서비스 안정성을 위한 기본적인 접속 로그",
-    ],
-  },
-  {
-    title: "이용 목적",
-    items: [
-      "문의 응대 및 서비스 개선",
-      "오류 분석과 품질 향상",
-      "부정 사용 방지",
-    ],
-  },
-  {
-    title: "분석 도구",
-    items: [
-      "서비스 개선을 위해 Microsoft Clarity 분석 도구를 사용합니다.",
-      "사용자 입력값 등 민감 정보는 기본적으로 마스킹되어 기록됩니다.",
-      "분석 데이터는 사용자 경험 개선과 오류 파악 목적으로만 사용합니다.",
-    ],
-  },
-  {
-    title: "보관 기간",
-    items: [
-      "문의 응대 완료 후 3개월 이내 파기",
-      "법령에 따른 보관 의무가 있는 경우 해당 기간 보관",
-    ],
-  },
-  {
-    title: "이용자 권리",
-    items: [
-      "개인정보 열람, 정정, 삭제 요청",
-      "처리 정지 요청",
-    ],
-  },
-];
+import localeMessages from "@/lib/core/locale-messages";
+import useLocale from "@/lib/core/use-locale";
 
 export default function PrivacyPolicyPage(): ReactElement {
+  const locale = useLocale();
+  const messages = localeMessages[locale];
+
   return (
     <main className="background-canvas min-h-screen px-6 py-16">
       <div className="mx-auto w-full max-w-4xl space-y-10">
         <header className="space-y-3">
           <p className="text-sm uppercase tracking-[0.3em] text-muted">
-            개인정보 처리방침
+            {messages.privacy.eyebrow}
           </p>
-          <h1 className="text-4xl font-semibold text-ink">우리는 정보를 절제합니다.</h1>
-          <p className="text-base text-muted">
-            포춘 브레이커는 서비스 운영에 꼭 필요한 범위 내에서만 정보를
-            수집하며, 목적 외 사용을 하지 않습니다.
-          </p>
+          <h1 className="text-4xl font-semibold text-ink">
+            {messages.privacy.title}
+          </h1>
+          <p className="text-base text-muted">{messages.privacy.description}</p>
         </header>
         <section className="space-y-6">
-          {sections.map((section) => (
+          {messages.privacy.sections.map((section) => (
             <article
               key={section.title}
               className="rounded-3xl border border-ink/10 bg-paper/80 p-6 shadow-[var(--shadow-soft)]"
@@ -75,10 +36,7 @@ export default function PrivacyPolicyPage(): ReactElement {
           ))}
         </section>
         <section className="rounded-3xl border border-ink/10 bg-surface p-6 text-sm text-muted">
-          <p>
-            개인정보 보호와 관련한 문의는 <strong className="text-ink">문의 페이지</strong>를
-            통해 접수해 주세요. 최대한 빠르게 응답하겠습니다.
-          </p>
+          <p>{messages.privacy.closing}</p>
         </section>
       </div>
     </main>

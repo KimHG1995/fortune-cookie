@@ -6,19 +6,23 @@ import requestFortuneAction from "@/app/actions/request-fortune";
 import FortuneCookieCard from "@/app/components/fortune-cookie-card";
 import FortuneCookieSelector from "@/app/components/fortune-cookie-selector";
 import fortuneOptions from "@/lib/core/fortune-options";
+import localeMessages from "@/lib/core/locale-messages";
+import useLocale from "@/lib/core/use-locale";
 import useCrackSound from "@/lib/core/use-crack-sound";
 import clarityService from "@/lib/services/clarity-service";
 import fortuneStorage from "@/lib/services/fortune-storage";
 import type { FortuneRequest } from "@/models/types/fortune/fortune-request";
 import type { FortuneResult } from "@/models/types/fortune/fortune-result";
 
-const createInitialCategory = (): string => {
-  return fortuneOptions.jobCategories[0];
-};
-
 export default function FortuneCookie(): ReactElement {
-  const [selectedCategory, setSelectedCategory] = useState<string>(createInitialCategory());
-  const [selectedTone, setSelectedTone] = useState<FortuneRequest["tone"]>("차분함");
+  const locale = useLocale();
+  const messages = localeMessages[locale];
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    fortuneOptions.jobCategories[locale][0],
+  );
+  const [selectedTone, setSelectedTone] = useState<FortuneRequest["tone"]>(
+    fortuneOptions.toneOptions[locale][0],
+  );
   const [isCracked, setIsCracked] = useState<boolean>(false);
   const [fortune, setFortune] = useState<FortuneResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -26,13 +30,18 @@ export default function FortuneCookie(): ReactElement {
   const { executeCrackSound } = useCrackSound();
 
   useEffect(() => {
-    const storedFortune = fortuneStorage.readStoredFortune();
-    if (!storedFortune) {
+    setSelectedCategory(fortuneOptions.jobCategories[locale][0]);
+    setSelectedTone(fortuneOptions.toneOptions[locale][0]);
+    setErrorMessage(null);
+    const storedFortune = fortuneStorage.readStoredFortune(locale);
+    if (storedFortune) {
+      setFortune(storedFortune);
+      setIsCracked(true);
       return;
     }
-    setFortune(storedFortune);
-    setIsCracked(true);
-  }, []);
+    setFortune(null);
+    setIsCracked(false);
+  }, [locale]);
 
   const executeCrackAnimation = (): void => {
     setIsCracked(false);
@@ -46,14 +55,14 @@ export default function FortuneCookie(): ReactElement {
     if (response.success) {
       setFortune(response.data);
       if (response.data) {
-        fortuneStorage.saveStoredFortune(response.data);
+        fortuneStorage.saveStoredFortune(locale, response.data);
       }
       setErrorMessage(null);
       clarityService.executeClarityEvent("fortune_success");
       return;
     }
     setFortune(null);
-    setErrorMessage(response.error?.detail ?? "요청에 실패했습니다.");
+    setErrorMessage(messages.fortune.error);
     clarityService.executeClarityEvent("fortune_error");
   }
 
@@ -62,13 +71,14 @@ export default function FortuneCookie(): ReactElement {
     executeCrackAnimation();
     executeCrackSound();
     setErrorMessage(null);
-    const storedFortune = fortuneStorage.readStoredFortune();
+    const storedFortune = fortuneStorage.readStoredFortune(locale);
     if (storedFortune) {
       setFortune(storedFortune);
       clarityService.executeClarityEvent("fortune_success");
       return;
     }
     const request: FortuneRequest = {
+      locale,
       jobCategory: selectedCategory,
       tone: selectedTone,
     };

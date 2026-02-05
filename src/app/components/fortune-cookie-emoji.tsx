@@ -1,5 +1,9 @@
+"use client";
+
 import type { CSSProperties, ReactElement } from "react";
 import Image from "next/image";
+import localeMessages from "@/lib/core/locale-messages";
+import useLocale from "@/lib/core/use-locale";
 import type { FortuneCookieEmojiProps } from "@/models/types/ui/fortune-cookie-emoji-props";
 
 const uncrackedImageUrl = "/fortune-cookie.svg";
@@ -21,11 +25,16 @@ export default function FortuneCookieEmoji({
   stripText = "",
   isCracked,
 }: FortuneCookieEmojiProps): ReactElement {
+  const locale = useLocale();
+  const messages = localeMessages[locale];
+  const intactAlt = `${messages.emojiAlt.intactPrefix} ${stripText}`.trim();
+  const crackedAlt = `${messages.emojiAlt.crackedPrefix} ${stripText}`.trim();
+
   return (
     <div style={cardStyle}>
       <Image
         src={uncrackedImageUrl}
-        alt={`포춘쿠키 캐릭터 ${stripText}`}
+        alt={intactAlt}
         fill
         sizes="(min-width: 1024px) 980px, 100vw"
         className={`transition-all duration-500 ease-out ${
@@ -36,7 +45,7 @@ export default function FortuneCookieEmoji({
       />
       <Image
         src={crackedImageUrl}
-        alt={`깨진 포춘쿠키 ${stripText}`}
+        alt={crackedAlt}
         fill
         sizes="(min-width: 1024px) 980px, 100vw"
         className={`transition-all duration-500 ease-out ${

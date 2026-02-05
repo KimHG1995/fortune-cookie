@@ -1,31 +1,42 @@
 import { z } from "zod";
+import localeMessages from "@/lib/core/locale-messages";
+import type { Locale } from "@/models/types/app/locale";
 
-const emailSchema = z
-  .string()
-  .trim()
-  .min(1, "이메일을 입력해 주세요.")
-  .pipe(z.email("이메일 형식이 올바르지 않습니다."));
+const createContactFormSchema = (locale: Locale): z.ZodObject<{
+  name: z.ZodString;
+  email: z.ZodPipe<z.ZodString, z.ZodEmail>;
+  topic: z.ZodString;
+  message: z.ZodString;
+}> => {
+  const messages = localeMessages[locale].contact.validation;
 
-const contactFormSchema = z.object({
-  name: z
+  const emailSchema = z
     .string()
     .trim()
-    .min(1, "이름을 입력해 주세요.")
-    .min(2, "이름은 2글자 이상이어야 합니다.")
-    .max(20, "이름은 20글자 이하이어야 합니다."),
-  email: emailSchema,
-  topic: z
-    .string()
-    .trim()
-    .min(1, "문의 주제를 선택해 주세요.")
-    .min(2, "문의 주제는 2글자 이상이어야 합니다.")
-    .max(30, "문의 주제는 30글자 이하이어야 합니다."),
-  message: z
-    .string()
-    .trim()
-    .min(1, "메시지를 입력해 주세요.")
-    .min(20, "메시지는 20글자 이상이어야 합니다.")
-    .max(500, "메시지는 500글자 이하이어야 합니다."),
-});
+    .min(1, messages.emailRequired)
+    .pipe(z.email(messages.emailInvalid));
 
-export default contactFormSchema;
+  return z.object({
+    name: z
+      .string()
+      .trim()
+      .min(1, messages.nameRequired)
+      .min(2, messages.nameMin)
+      .max(20, messages.nameMax),
+    email: emailSchema,
+    topic: z
+      .string()
+      .trim()
+      .min(1, messages.topicRequired)
+      .min(2, messages.topicMin)
+      .max(30, messages.topicMax),
+    message: z
+      .string()
+      .trim()
+      .min(1, messages.messageRequired)
+      .min(20, messages.messageMin)
+      .max(500, messages.messageMax),
+  });
+};
+
+export default createContactFormSchema;

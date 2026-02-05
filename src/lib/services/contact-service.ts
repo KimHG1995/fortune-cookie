@@ -1,6 +1,6 @@
 import "server-only";
 
-import contactFormSchema from "@/models/dto/contact-form.dto";
+import createContactFormSchema from "@/models/dto/contact-form.dto";
 import createProblemDetails from "@/lib/core/create-problem-details";
 import type { ApiResponse } from "@/models/types/api/api-response";
 import type { ContactSubmissionResult } from "@/models/types/contact/contact-submission-result";
@@ -38,7 +38,7 @@ const createErrorResponse = (input: {
 async function submitContact(input: {
   data: ContactFormData;
 }): Promise<ApiResponse<ContactSubmissionResult>> {
-  const parseResult = contactFormSchema.safeParse(input.data);
+  const parseResult = createContactFormSchema("en").safeParse(input.data);
   if (!parseResult.success) {
     return createErrorResponse({
       status: 400,

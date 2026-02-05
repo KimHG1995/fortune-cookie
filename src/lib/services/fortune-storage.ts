@@ -1,5 +1,6 @@
 "use client";
 
+import type { Locale } from "@/models/types/app/locale";
 import type { FortuneResult } from "@/models/types/fortune/fortune-result";
 
 type StoredFortune = {
@@ -8,11 +9,13 @@ type StoredFortune = {
 };
 
 type FortuneStorage = {
-  readonly readStoredFortune: () => FortuneResult | null;
-  readonly saveStoredFortune: (fortune: FortuneResult) => void;
+  readonly readStoredFortune: (locale: Locale) => FortuneResult | null;
+  readonly saveStoredFortune: (locale: Locale, fortune: FortuneResult) => void;
 };
 
-const storageKey = "fortune-cookie:daily";
+const createStorageKey = (locale: Locale): string => {
+  return `fortune-cookie:daily:${locale}`;
+};
 
 const createTodayKey = (): string => {
   return new Date().toISOString().slice(0, 10);
@@ -41,8 +44,8 @@ function parseStoredFortune(raw: string): StoredFortune | null {
   }
 }
 
-function readStoredFortune(): FortuneResult | null {
-  const raw = localStorage.getItem(storageKey);
+function readStoredFortune(locale: Locale): FortuneResult | null {
+  const raw = localStorage.getItem(createStorageKey(locale));
   if (!raw) {
     return null;
   }
@@ -56,12 +59,12 @@ function readStoredFortune(): FortuneResult | null {
   return stored.fortune;
 }
 
-function saveStoredFortune(fortune: FortuneResult): void {
+function saveStoredFortune(locale: Locale, fortune: FortuneResult): void {
   const payload: StoredFortune = {
     date: createTodayKey(),
     fortune,
   };
-  localStorage.setItem(storageKey, JSON.stringify(payload));
+  localStorage.setItem(createStorageKey(locale), JSON.stringify(payload));
 }
 
 const fortuneStorage: FortuneStorage = {
