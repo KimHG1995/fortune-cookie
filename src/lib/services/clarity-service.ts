@@ -18,7 +18,11 @@ const executeClarityEvent = (eventName: ClarityEventName): void => {
   if (!canExecuteClarity()) {
     return;
   }
-  window.clarity("event", eventName);
+  const clarity = window.clarity;
+  if (!clarity) {
+    return;
+  }
+  clarity("event", eventName);
 };
 
 const clarityService = {
